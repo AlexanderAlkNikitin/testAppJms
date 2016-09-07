@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:element name="person" type="Person"/>
+    <xsd:element name="card" type="Card"/>
+
+    <xsd:complexType name="Card">
+        <xsd:sequence>
+            <xsd:element name="ID" type="xsd:int"/>
+            <xsd:element name="Person" type="Person"/>
+            <xsd:element name="Status" type="StatusType"/>
+            <xsd:element name="Limit" type="xsd:int"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <xsd:simpleType name="StatusType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="ENABLED"/>
+            <xsd:enumeration value="DISABLED"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="Person">
+        <xsd:sequence>
+            <xsd:element name="ID" type="xsd:int"/>
+            <xsd:element name="FirstName" type="xsd:string"/>
+            <xsd:element name="LastName" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="OrderActivatedCard">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="ID" type="xsd:int"/>
+                <xsd:element name="Card" type="Card"/>
+                <xsd:element name="Solve" type="SolveType"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:simpleType name="SolveType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="YES"/>
+            <xsd:enumeration value="NO"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

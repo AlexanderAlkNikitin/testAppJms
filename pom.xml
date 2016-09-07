@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.anikitin</groupId>
+    <artifactId>appJmsCard</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <properties>
+        <!-- Spring version -->
+        <spring-framework.version>4.3.2.RELEASE</spring-framework.version>
+        <!-- ActiveMQ version -->
+        <activemq.version>5.10.0</activemq.version>
+        <sl4j-version>1.5.8</sl4j-version>
+    </properties>
+    <dependencies>
+        <!-- Spring aritifacts -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring-framework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+            <version>${spring-framework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring-framework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-oxm</artifactId>
+            <version>${spring-framework.version}</version>
+        </dependency>
+
+        <!-- ActiveMQ Artifacts -->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-spring</artifactId>
+            <version>${activemq.version}</version>
+        </dependency>
+        <!--Others-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>2.2</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.github.danielwegener.xjc</groupId>
+                        <artifactId>xjc-guava-plugin</artifactId>
+                        <version>0.3.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                        <version>2.11.0</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <arguments>-Xguava</arguments>
+                    <packageName>generated</packageName>
+                    <extension>true</extension>
+                    <sources>
+                    <source>${basedir}/src/main/resources/OrderActivateCard.xsd</source>
+                    </sources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-model</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
