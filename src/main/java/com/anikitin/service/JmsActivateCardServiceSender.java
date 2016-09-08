@@ -21,7 +21,7 @@ public class JmsActivateCardServiceSender {
     public void sendObjectXmlToQueue(OrderActivatedCard orderActivatedCard) {
         this.jmsTemplate.convertAndSend(orderActivatedCard);
     }
-    public void sendObjectXmlToQueue(Destination destination,OrderActivatedCard orderActivatedCard) {
+    public void sendObjectXmlTo(Destination destination, OrderActivatedCard orderActivatedCard) {
         this.jmsTemplate.convertAndSend(destination,orderActivatedCard);
     }
 

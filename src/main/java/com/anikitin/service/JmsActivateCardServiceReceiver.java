@@ -31,7 +31,7 @@ public class JmsActivateCardServiceReceiver {
 
     public OrderActivatedCard sendAfterReceive() {
         OrderActivatedCard receivedOrder = (OrderActivatedCard) this.jmsTemplate.receiveAndConvert();
-        jmsActivateCardServiceSender.sendObjectXmlToQueue(optionalDestination, receivedOrder);
+        jmsActivateCardServiceSender.sendObjectXmlTo(optionalDestination, receivedOrder);
         return receivedOrder;
 
     }

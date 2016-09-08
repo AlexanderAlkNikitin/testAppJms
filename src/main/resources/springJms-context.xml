@@ -16,6 +16,7 @@
     <bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
         <!-- brokerURL, You may have different IP or port -->
         <constructor-arg index="0" value="tcp://localhost:61616" />
+        <property name="clientID" value="topic.durable.id"/>
     </bean>
 
     <!-- Pooled Spring connection factory -->
@@ -39,6 +40,10 @@
     <bean id="topicDestination" class="org.apache.activemq.command.ActiveMQTopic">
         <!-- name of the queue -->
         <constructor-arg index="0" value="topicJms" />
+    </bean>
+    <bean id="topicDurable" class="org.apache.activemq.command.ActiveMQTopic">
+        <!-- name of the queue -->
+        <constructor-arg index="0" value="topic.durable" />
     </bean>
 
     <jms:listener-container
