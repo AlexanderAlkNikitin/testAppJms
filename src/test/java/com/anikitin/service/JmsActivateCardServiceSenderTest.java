@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.jms.Destination;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -17,10 +19,14 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration("classpath:springJms-context.xml")
 public class JmsActivateCardServiceSenderTest {
 
+
     @Autowired
     private JmsActivateCardServiceSender jmsActivateCardServiceSender;
     @Autowired
     private JmsActivateCardServiceReceiver jmsActivateCardServiceReceiver;
+
+    @Autowired
+    private Destination topicDestination;
 
     @org.junit.Test
     public void sendObjectXml() throws Exception {
@@ -33,7 +39,7 @@ public class JmsActivateCardServiceSenderTest {
     @Test
     public void sendObjectXmlToTopic() throws Exception {
         OrderActivatedCard orderActivatedCard = getOrderActivatedCard();
-        jmsActivateCardServiceSender.sendObjectXmlToTopic(orderActivatedCard);
+        jmsActivateCardServiceSender.sendObjectXmlTo(topicDestination,orderActivatedCard);
 
     }
 

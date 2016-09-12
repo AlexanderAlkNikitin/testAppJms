@@ -2,12 +2,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:jms="http://www.springframework.org/schema/jms"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+       xmlns:jms="http://www.springframework.org/schema/jms" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 
     <context:component-scan base-package="com.anikitin.service" />
-
+    <tx:annotation-driven/>
 
     <!-- =============================================== -->
     <!-- JMS Common, Define JMS connectionFactory       -->
@@ -16,15 +16,24 @@
     <bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
         <!-- brokerURL, You may have different IP or port -->
         <constructor-arg index="0" value="tcp://localhost:61616" />
+        <property name="redeliveryPolicy">
+            <bean class="org.apache.activemq.RedeliveryPolicy">
+                <property name="maximumRedeliveries" value="4"/>
+            </bean>
+        </property>
         <property name="clientID" value="topic.durable.id"/>
     </bean>
 
-    <!-- Pooled Spring connection factory -->
+     <!--Pooled Spring connection factory -->
     <bean id="connectionFactory"
           class="org.springframework.jms.connection.CachingConnectionFactory">
         <constructor-arg ref="amqConnectionFactory" />
     </bean>
-
+    <!-- setup JMS connection factory -->
+    <!--<bean id="poolConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" init-method="start" destroy-method="stop">-->
+        <!--<property name="maxConnections" value="8"/>-->
+        <!--<property name="connectionFactory" ref="amqConnectionFactory"/>-->
+    <!--</bean>-->
     <!-- ======================================================= -->
     <!-- JMS Send, define default destination and JmsTemplate    -->
     <!-- ======================================================= -->
@@ -32,6 +41,9 @@
     <bean id="defaultDestination" class="org.apache.activemq.command.ActiveMQQueue">
         <!-- name of the queue -->
         <constructor-arg index="0" value="Send2Recv" />
+    </bean><bean id="tmp" class="org.apache.activemq.command.ActiveMQTempQueue">
+        <!-- name of the queue -->
+        <constructor-arg index="0" value="ActiveMQ.Advisory.TempQueue" />
     </bean>
     <bean id="optionalDestination" class="org.apache.activemq.command.ActiveMQQueue">
         <!-- name of the queue -->
@@ -50,7 +62,7 @@
             connection-factory="connectionFactory"
             destination-type="topic"
             message-converter="oxmMessageConverter"
-            acknowledge="auto" >
+            acknowledge="auto">
         <jms:listener destination="topicJms" ref="jmsActivateCardServiceReceiver" method="receiveOrderActivateCardFromTopic"/>
         <jms:listener destination="topicJms" ref="jmsActivateCardServiceReceiverOptional" method="receiveOrderActivateCardFromTopic"/>
     </jms:listener-container>
@@ -61,12 +73,20 @@
         <property name="defaultDestination" ref="defaultDestination" />
         <property name="messageConverter" ref="oxmMessageConverter"/>
         <property name="pubSubDomain" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="receiveTimeout" value="1000" />
+        <property name="deliveryPersistent" value="true"/>
+
     </bean>
     <bean id="oxmMessageConverter" class="org.springframework.jms.support.converter.MarshallingMessageConverter">
         <property name="marshaller" ref="marshaller"/>
         <property name="unmarshaller" ref="marshaller"/>
     </bean>
 
+    <bean id="transactionManager" class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="nestedTransactionAllowed" value="true"/>
+    </bean>
 
     <bean id="marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
         <property name="classesToBeBound">

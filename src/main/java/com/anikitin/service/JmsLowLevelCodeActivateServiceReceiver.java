@@ -16,13 +16,10 @@ public class JmsLowLevelCodeActivateServiceReceiver {
     private ConnectionFactory connectionFactory;
     @Autowired
     private Topic topicDurable;
-    @Autowired
-    private Topic topicDestination;
 
     private TopicSession session;
     private TopicConnection connection;
     private TopicSubscriber topicSubscriber;
-    private MessageConsumer consumer;
 
     public void openConsumerDurableSubscribe() {
         try {

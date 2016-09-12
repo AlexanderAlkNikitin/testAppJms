@@ -4,14 +4,21 @@ import generated.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.listener.adapter.ReplyFailureException;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
+
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,6 +29,8 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration("classpath:springJms-context.xml")
 public class JmsActivateCardServiceReceiverTest {
 
+
+    private static final Logger logger= LoggerFactory.getLogger(JmsActivateCardServiceReceiverTest.class);
     @Autowired
     private JmsActivateCardServiceSender jmsActivateCardServiceSender;
     @Autowired
@@ -39,41 +48,53 @@ public class JmsActivateCardServiceReceiverTest {
 
     private OrderActivatedCard orderActivatedCard;
 
-//    @Before
-//    public void setUp() throws Exception {
-
-//        jmsActivateCardServiceSender.sendObjectXmlToQueue(orderActivatedCard);
-//
-//    }
-
     @Test
     public void receiveXml() throws Exception {
+        orderActivatedCard=init();
+        jmsActivateCardServiceSender.sendObjectXmlToQueue(orderActivatedCard);
         OrderActivatedCard fromQueue = jmsActivateCardServiceReceiver.receiveOrderActivateCard();
         assertEquals(fromQueue, orderActivatedCard);
 
     }
 
     @Test
-    public void durableSubscribe() throws JMSException {
+    public void durableSubscribe() throws JMSException, InterruptedException {
         orderActivatedCard=init();
         jmsLowLevelCodeActivateServiceReceiver.stopConsumer();
         jmsLowLevelCodeActivateServiceReceiver.openConsumerDurableSubscribe();
         jmsActivateCardServiceSender.sendObjectXmlTo(topicDurable,orderActivatedCard);
         jmsActivateCardServiceSender.sendObjectXmlTo(topicDurable,orderActivatedCard);
         jmsActivateCardServiceSender.sendObjectXmlTo(topicDurable,orderActivatedCard);
+        Thread.sleep(1000);
         jmsLowLevelCodeActivateServiceReceiver.stopConsumer();
+        System.out.println("Off consumer");
         jmsActivateCardServiceSender.sendObjectXmlTo(topicDurable,orderActivatedCard);
         jmsActivateCardServiceSender.sendObjectXmlTo(topicDurable,orderActivatedCard);
         jmsActivateCardServiceSender.sendObjectXmlTo(topicDurable,orderActivatedCard);
+        System.out.println("on consumer");
         jmsLowLevelCodeActivateServiceReceiver.openConsumerDurableSubscribe();
 
     }
 
     @Test
+    @Transactional
+    @Rollback(value = false)
     public void sendAfterReceive() throws Exception {
-
-        OrderActivatedCard forwardingOrder = jmsActivateCardServiceReceiver.sendAfterReceive();
-        OrderActivatedCard forwardedOrder = jmsActivateCardServiceReceiver.receiveOrderActivateCard(optionalDestination);
+        logger.info("init test Object");
+        orderActivatedCard=init();
+        jmsActivateCardServiceSender.sendObjectXmlToQueue(orderActivatedCard);
+        jmsActivateCardServiceSender.sendAndReceiv(optionalDestination);
+        assertEquals(orderActivatedCard,jmsActivateCardServiceReceiver.receiveOrderActivateCard(optionalDestination));
+    }
+    @Test(expected = Exception.class)
+    @Transactional
+    public void sendAfterReceiveRallBack() throws Exception {
+        logger.info("init test Object");
+        orderActivatedCard=init();
+        jmsActivateCardServiceSender.sendObjectXmlToQueue(orderActivatedCard);
+        OrderActivatedCard forwardingOrder = jmsActivateCardServiceReceiver.sendAfterReceiveRallBack();
+        Thread.sleep(1000);
+        OrderActivatedCard forwardedOrder = jmsActivateCardServiceReceiver.receiveOrderActivateCardFromOrder();
 
         assertEquals(orderActivatedCard,forwardingOrder);
         assertEquals(orderActivatedCard,forwardedOrder);
