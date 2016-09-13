@@ -5,14 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.SessionCallback;
 import org.springframework.stereotype.Service;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Session;
 
 /**
  * Created by anikitin on 07.09.2016.
@@ -20,6 +16,7 @@ import javax.jms.Session;
 @Service
 
 public class JmsActivateCardServiceReceiver {
+    private static final Logger LOG = LoggerFactory.getLogger(JmsActivateCardServiceReceiver.class);
 
     @Autowired
     private JmsTemplate jmsTemplate;
@@ -28,32 +25,25 @@ public class JmsActivateCardServiceReceiver {
     @Autowired
     private Destination optionalDestination;
 
-    private static final Logger LOG= LoggerFactory.getLogger(JmsActivateCardServiceReceiver.class);
-
-
 
     public OrderActivatedCard receiveOrderActivateCard() {
-        return (OrderActivatedCard) this.jmsTemplate.receiveAndConvert();
-    }
-
-    public OrderActivatedCard receiveOrderActivateCardFromTopic(OrderActivatedCard orderActivatedCard) {
-        System.out.println("received: " + orderActivatedCard);
+        OrderActivatedCard orderActivatedCard=(OrderActivatedCard) this.jmsTemplate.receiveAndConvert();
+        LOG.info("received: " + orderActivatedCard);
         return orderActivatedCard;
     }
 
     @Transactional
-    public OrderActivatedCard sendAfterReceiveRallBack() throws Exception {
+    public OrderActivatedCard sendAfterReceiveRollBack() throws Exception {
         LOG.info("receiving test Object");
         OrderActivatedCard receivedOrder = receiveOrderActivateCard();
         LOG.info("test object received");
         LOG.info("sending test object after receive");
         jmsActivateCardServiceSender.sendObjectXmlTo(optionalDestination, receivedOrder);
-        if(1==1)throw new Exception();
+        if (1 == 1) throw new Exception();
         LOG.info("test object sended after receive");
         return receivedOrder;
 
     }
-
 
 
     public OrderActivatedCard receiveOrderActivateCardFromOrder() {

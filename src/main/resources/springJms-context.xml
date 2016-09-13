@@ -58,14 +58,28 @@
         <constructor-arg index="0" value="topic.durable" />
     </bean>
 
-    <jms:listener-container
-            connection-factory="connectionFactory"
-            destination-type="topic"
-            message-converter="oxmMessageConverter"
-            acknowledge="auto">
-        <jms:listener destination="topicJms" ref="jmsActivateCardServiceReceiver" method="receiveOrderActivateCardFromTopic"/>
-        <jms:listener destination="topicJms" ref="jmsActivateCardServiceReceiverOptional" method="receiveOrderActivateCardFromTopic"/>
-    </jms:listener-container>
+    <!--<jms:listener-container-->
+            <!--connection-factory="connectionFactory"-->
+            <!--destination-type="topic"-->
+            <!--message-converter="oxmMessageConverter"-->
+            <!--acknowledge="auto" error-handler="jmsErrorHandler">-->
+        <!--<jms:listener destination="topicJms" ref="jmsActivateCardServiceReceiver" method="receiveOrderActivateCardFromTopic"/>-->
+        <!--<jms:listener destination="topicJms" ref="jmsActivateCardServiceReceiverOptional" method="receiveOrderActivateCardFromTopic"/>-->
+    <!--</jms:listener-container>-->
+
+    <bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="topicDestination"/>
+        <property name="messageListener" ref="jmsActivateCardServiceReceiverListener"/>
+        <property name="messageConverter" ref="oxmMessageConverter"/>
+    </bean>
+
+    <bean id="jmsContainer2" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="topicDestination"/>
+        <property name="messageListener" ref="jmsActivateCardServiceReceiverOptionalListener"/>
+        <property name="messageConverter" ref="oxmMessageConverter"/>
+    </bean>
 
     <!-- JmsTemplate Definition -->
     <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">

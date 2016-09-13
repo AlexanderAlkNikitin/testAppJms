@@ -43,13 +43,13 @@ public class JmsActivateCardServiceSender {
 
     @Transactional
     public void sendObjectXmlTo(Destination destination, OrderActivatedCard orderActivatedCard) {
-        System.out.println("Send message to" + destination.toString());
+        LOG.info("Send message to " + destination.toString());
         this.jmsTemplate.convertAndSend(destination, orderActivatedCard);
     }
 
 
     @Transactional
-    public void sendAndReceiv(Destination destination) {
+    public void sendAndReceive(Destination destination) {
         LOG.debug(destination.toString());
         this.jmsTemplate.sendAndReceive(destination, new MessageCreator() {
             @Override
